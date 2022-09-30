@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+    <%- include('./partials/header.ejs')  %> 
+    <body>
+        
+    <!-- <div id="header" class="col-md-12">
+        <h1 class="text-center" >Ten Billion Tsunami Tree Programme</h1>
+    </div> -->
+    <%- include('./partials/nav.ejs') %>
+    <div class="row">
+    <div id="side-panel" class="col-md-3 overflow-auto dropdown">
+        <h1 class="text-center" >Plantation List</h1>
+        <hr>
+        <p id="zoomtooverlap" data-ts-speed="500" value = "<%= overlap%>"  ></p>
+        
+          <ul class="list-group">
+            <li class="list-group-item">
+              <input class="form-check-input me-1" type="checkbox" value="" id="firstCheckbox">
+              <label class="form-check-label" for="firstCheckbox">All Plantations</label>
+            </li>
+            <li class="list-group-item">
+              <input class="form-check-input me-1" type="checkbox" value="" id="secondCheckbox">
+              <label class="form-check-label" for="secondCheckbox">Plantation 2019/20</label>
+            </li>
+            <li class="list-group-item">
+              <input class="form-check-input me-1" type="checkbox" value="" id="thirdCheckbox">
+              <label class="form-check-label" for="thirdCheckbox">Plantation 2020/21</label>
+            </li>
+          </ul>
+          <div class="dropdown" style="margin: 5px auto;">
+            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Plantation 2020/21
+            </a>
+            <ul class="dropdown-menu">
+                    <%data_2020_21.forEach((data)=>{%>
+                        <li><a class="dropdown-item item" id=<%= data.uid%>><%=data.site_name%></a></li>
+                    <%})%>
+            </ul>
+          </div>
+          <div class="dropdown">
+            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Plantation 2019/20
+            </a>
+            <ul class="dropdown-menu">
+                <%data_2019_20.forEach((data)=>{%>
+                    <li><a class="dropdown-item item" id=<%= data.uid%>><%=data.site_name%></a></li>
+                <%})%>
+            </ul>
+          </div>
+
+          <div class="dropdown" style="margin: 5px auto;">
+            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Forest Division
+            </a>
+            <ul class="dropdown-menu divisions">
+                    <ul class="list-group">
+                          <%f_division.forEach((data)=>{%>
+                        <li class="list-group-item">
+                            <input class="form-check-input me-1 divisionclass" type="checkbox" name="<%=data.division_name %>" value="" id="<%=data.d_uid%>">
+                            <label class="form-check-label" for="<%=data.d_uid%>"><%=data.division_name %> </label>
+                        </li>
+                            <%})%>     
+                    </ul>
+          </div>
+          
+          
+
+    </div>
+    <div id="map"  class="col-md-9"></div>
+    </div>
+    <div id="footer"  class="col-md-12">
+        <h1></h1>
+        <h4 class="text-center">&copy;2022 <a href="www.millermountain.com">PMU TBTTP-AJK</a>
+        <br>
+        <a>GIS Department</a>
+        </h4>
+        
+    </div>
+    
+    
+</body>
+
+<script type="text/javascript">
+    var item_clicked 
+    var checked = false
+
+    // TO fetch all data of plantations 2019-21
+    var gson
+    var gsonalldata
+    var gson2019_20
+    var gson2020_21
+
+    var speed = $("#zoomtooverlap").data("ts-speed");
+    console.log('spe',speed);
+
+    function fetchAllData(){
+    $('#firstCheckbox').on('change', function() {
+        if($(this).is(':checked')){
+            checked = true
+            fetch('/data')
+            // 2 methods to write this  arrow function
+            // .then(response=>response.json())
+            .then((response)=>{
+                return response.json();
+            })
+            .then((data)=>{
+                
+                // console.log('data 12',data);
+                gsonalldata = L.geoJSON([data.data2020_21,data.data2019_20]).addTo(map);
+                assetLayerGroup.addLayer(gsonalldata)
+                // map.fitBounds(gsonalldata.getBounds())
+                gsonalldata.eachLayer(function(layer) {
+                    var popuptext = `<div class="modal-dialog modal-sm" ><b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}</div>`
+                    layer.bindPopup(popuptext).addTo(map)
+                })
+                // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
+                
+            })
+        }
+        
+    else{
+        console.log('false',gson);
+        map.removeLayer(gsonalldata)
+    }
+
+    })
+}
+    fetchAllData()
+
+    $('#secondCheckbox').on('change', function() {
+        var myStyle = {
+            "color": "#ff7800",
+            "weight": 5,
+            "opacity": 0.65,
+            "fillOpacity": 0
+        };
+        if($(this).is(':checked')){
+            checked = true
+            fetch('/data')
+            // 2 methods to write this  arrow function
+            // .then(response=>response.json())
+            .then((response)=>{
+                return response.json();
+            })
+            .then((data)=>{
+                
+                // console.log('data 12',data);
+                gson2019_20 = L.geoJSON([data.data2019_20],{style:myStyle}).addTo(map);
+                gson2019_20.eachLayer(function(layer) {
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    // console.log('data 13', popuptext);
+                    layer.bindPopup(popuptext).addTo(map)
+                })
+                // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
+                // map.fitBounds(gson.getBounds())
+            })
+        }
+        
+    else{
+        console.log('false',gson2019_20);
+        map.removeLayer(gson2019_20)
+    }
+    })
+    $('#thirdCheckbox').on('change', function() {
+        var myStyle = {
+            "color": "#fa0707",
+            "weight": 5,
+            "opacity": 0.65,
+            "fillOpacity": 0
+        };
+        if($(this).is(':checked')){
+            checked = true
+            fetch('/data')
+            // 2 methods to write this  arrow function
+            // .then(response=>response.json())
+            .then((response)=>{
+                return response.json();
+            })
+            .then((data)=>{
+                
+                // console.log('data 12',data);
+                gson2020_21 = L.geoJSON([data.data2020_21],{style:myStyle}).addTo(map);
+                gson2020_21.eachLayer(function(layer) {
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    // console.log('data 13', popuptext);
+                    layer.bindPopup(popuptext).addTo(map)
+                })
+                // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
+                // map.fitBounds(gson.getBounds())
+            })
+        }
+        
+    else{
+        console.log('false',gson2020_21);
+        map.removeLayer(gson2020_21)
+    }
+    })
+    // Display data on map based on forest divisions
+    var checkedids = []
+    var id_ 
+    var x
+    var assetLayerGroup = new L.LayerGroup()
+
+    $('input.divisionclass').on('click', function(e) {
+        if($(this).is(':checked')){
+            checkedids.push(this.id)
+            select_division_endpoint = '/division/'+this.id
+            console.log('a',select_division_endpoint);
+            fetch(select_division_endpoint)
+            .then(response => response.json())
+            .then((data) => {
+                console.log('res',data)
+                gson = L.geoJSON(data).addTo(map)
+                // L.control.layers(gson).addTo(map)
+                x = L.stamp(gson); // Retrieve the x layer ID
+                console.log('id,',x);
+                map.fitBounds(gson.getBounds())
+                gson.eachLayer(function(layer) {
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    // console.log('data 13', popuptext);
+                    layer.bindPopup(popuptext).addTo(map)
+                    
+                    // console.log('map',map);
+                })
+            
+            });
+            
+        }
+        else{
+            
+            
+            checkedids.remove(this.id);
+            console.log('uncheckedid', x);
+            // assetLayerGroup.removeLayer(x)
+            // map.eachLayer((layer)=>{
+            //     console.log('layer',layer);
+            // })
+            // map.addLayer(assetLayerGroup)
+            
+            // map.removeLayer(x)
+            map.removeLayer(gson)
+        }
+    })
+    Array.prototype.remove = function() {
+    var what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
+
+    var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    })
+    var goggle_satellite = L.gridLayer
+	.googleMutant({
+		type: "satellite", // valid values are 'roadmap', 'satellite', 'terrain' and 'hybrid'
+	})
+    var map = L.map('map',{layers:[goggle_satellite,osm_map]})
+    // map.setView([33,77], 9)
+    map.addLayer(osm_map);
+
+    var baseMaps = {
+        "OpenStreetMap":osm_map,
+        "Google Satellite Map":goggle_satellite,
+    }
+    var layerControl = L.control.layers(baseMaps).addTo(map);
+    map.setView([33.72169354140095, 73.58130240275987],8)
+
+    var popup_marker = L.marker([0,0])
+    $('.item').click(function(e) {
+        item_clicked = e.target.id
+        console.log('click',e.target.id);
+        api = '/data/'+e.target.id
+        fetch(api)
+        .then((response)=>{
+            return response.json();
+        })
+        .then((result)=>{
+            map.removeLayer(popup_marker)
+            var gson = L.geoJSON(result)
+            popup_marker = L.marker(gson.getBounds().getCenter()).addTo(map)
+            map.fitBounds(gson.getBounds())
+            
+        })
+    })
+    console.log('zoomes',$('#zoomtooverlap')[0].attributes.value.value);
+    if ($('#zoomtooverlap')[0].attributes.value.value){
+        var id = $('#zoomtooverlap')[0].attributes.value.value
+        api = '/data/'+id
+        fetch(api)
+        .then((response)=>{
+            return response.json();
+        })
+        .then((result)=>{
+            map.removeLayer(popup_marker)
+            var gson = L.geoJSON(result)
+            // $('#firstCheckbox').prop('checked', true)
+            // popup_marker = L.marker(gson.getBounds().getCenter()).addTo(map)
+            map.fitBounds(gson.getBounds())
+            $('#zoomtooverlap')[0].attributes.value.value=null
+            // map.setView([33.72169354140095, 73.58130240275987],8)
+        })
+    }
+
+    // Displaying district boundaries on map
+
+    fetch('/data')
+            // 2 methods to write this  arrow function
+            // .then(response=>response.json())
+            .then((response)=>{
+                return response.json();
+            })
+            .then((data)=>{
+                var myStyle = {
+                "color": "#f2b866",
+                "weight": 3.5,
+                "opacity": 1,
+                "fillOpacity": 0
+            };  
+                
+                // console.log('data 12',data);
+                var gsonalldata = L.geoJSON([data.disttricts],{style:myStyle}).addTo(map);
+                assetLayerGroup.addLayer(gsonalldata)
+                // map.fitBounds(gsonalldata.getBounds())
+                gsonalldata.eachLayer(function(layer) {
+                    var popuptext = `<b>District</b> : ${layer.feature.properties.name}<br>`
+                    layer.bindPopup(popuptext).addTo(map)
+                })
+                // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
+                
+            })
+
+    if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+    console.info( "This page is reloaded" );
+    map.flyTo([33,74])
+    setTimeout(()=>{
+        map.setView([33.72169354140095, 73.58130240275987],8)
+    },1000)
+    
+    } else {
+    console.info( "This page is not reloaded");
+    // map.setView([33.72169354140095, 73.58130240275987],8)
+    }
+
+    // fetch('/data')
+    // // 2 methods to write this  arrow function
+    // // .then(response=>response.json())
+    // .then((response)=>{
+    //     return response.json();
+    // })
+    // .then((data)=>{
+    //     // console.log('data 12',data);
+    //     var gson = L.geoJSON([data.data2020_21,data.data2019_20]).addTo(map);
+    //     gson.eachLayer(function(layer) {
+    //         var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}`
+    //         // console.log('data 13', popuptext);
+    //         layer.bindPopup(popuptext).addTo(map)
+    //     })
+    //     // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
+    //     map.fitBounds(gson.getBounds())
+    // })
+</script>
+</html>
