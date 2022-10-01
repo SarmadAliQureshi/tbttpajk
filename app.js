@@ -314,7 +314,9 @@ app.post('/overlap/:id', (req, res) => {
     })
     
 })
-var server = require('http').createServer(app);
+var http = require('http');
+const server = http.createServer(app);
+
 
 const port = process.env.PORT || 3000;
 // app.use(sslRedirect([
