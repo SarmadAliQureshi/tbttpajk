@@ -316,7 +316,10 @@ app.post('/overlap/:id', (req, res) => {
 })
 
 const port = process.env.PORT || 3000;
-app.use(sslRedirect());
+app.use(sslRedirect([
+    'development',
+    'production'
+    ]));
 app.listen(process.env.PORT,()=>{
     zoomtooverlap = null
     console.log('listening on port 5000');
