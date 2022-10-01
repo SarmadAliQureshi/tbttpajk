@@ -6,7 +6,7 @@ var path = require('path');
 var {Pool} = require('pg');
 bodyParser = require('body-parser');
 var pool = require('./connection')
-import sslRedirect from 'heroku-ssl-redirect';
+// import sslRedirect from 'heroku-ssl-redirect';
 
 
 // var L = require('leaflet');
@@ -314,12 +314,13 @@ app.post('/overlap/:id', (req, res) => {
     })
     
 })
+var server = require('http').createServer(app);
 
 const port = process.env.PORT || 3000;
-app.use(sslRedirect([
-    'development',
-    'production'
-    ]));
+// app.use(sslRedirect([
+//     'development',
+//     'production'
+//     ]));
 app.listen(process.env.PORT,()=>{
     zoomtooverlap = null
     console.log('listening on port 5000');
