@@ -318,12 +318,17 @@ var http = require('http');
 const server = http.createServer(app);
 
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 // app.use(sslRedirect([
 //     'development',
 //     'production'
 //     ]));
-app.listen(process.env.PORT,()=>{
+let serving = app.listen(process.env.PORT,()=>{
     zoomtooverlap = null
     console.log('listening on port 5000');
 });
+
+serving.on('clientError', (err, socket) => {
+    console.error('err',err);
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+  });
