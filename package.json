@@ -4,11 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "dev": "react-scripts start",
-    "start": "serve -s app",
-    "build": "react-scripts app",
-    "eject": "react-scripts eject",
-    "heroku-postbuild": "npm run app"
+    "start": "node app.js"
     },
   "author": "",
   "license": "ISC",
