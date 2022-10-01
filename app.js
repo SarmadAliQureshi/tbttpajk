@@ -313,8 +313,8 @@ app.post('/overlap/:id', (req, res) => {
     
 })
 
-
-app.listen(5000,()=>{
+const port = process.env.PORT || 3000;
+app.listen(process.env.PORT,()=>{
     zoomtooverlap = null
-    console.log('listening on port 5050');
+    console.log('listening on port 5000');
 });
