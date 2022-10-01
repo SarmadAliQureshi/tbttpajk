@@ -6,6 +6,8 @@ var path = require('path');
 var {Pool} = require('pg');
 bodyParser = require('body-parser');
 var pool = require('./connection')
+import sslRedirect from 'heroku-ssl-redirect';
+
 
 // var L = require('leaflet');
 // const pool = new Pool({
@@ -314,6 +316,7 @@ app.post('/overlap/:id', (req, res) => {
 })
 
 const port = process.env.PORT || 3000;
+app.use(sslRedirect());
 app.listen(process.env.PORT,()=>{
     zoomtooverlap = null
     console.log('listening on port 5000');
