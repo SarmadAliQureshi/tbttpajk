@@ -5,15 +5,16 @@ const { loadavg } = require('os');
 var path = require('path');
 var {Pool} = require('pg');
 bodyParser = require('body-parser');
+var pool = require('./connection')
 
 // var L = require('leaflet');
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: 'postgres',
-    port: 5432,
-  })
+// const pool = new Pool({
+//     user: 'postgres',
+//     host: 'localhost',
+//     database: 'postgres',
+//     password: 'postgres',
+//     port: 5432,
+//   })
 
 app = express()
 
