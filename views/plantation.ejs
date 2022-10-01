@@ -77,6 +77,7 @@
         
     </div>
     
+    <!-- <div class="info legend leaflet-control"><strong>Categories</strong><br><i class="circle" style="color:red;background:#de2d26;"></i> Road Surface<br><i class="circle" style="color:red;background-color:#377eb8"></i> Signage<br><i class="circle" style="color:red;background-color:#4daf4a"></i> Line Markings<br><i class="circle" style="color:red;background-color:#984ea3"></i> Roadside Hazards<br><i class="circle" style="color:red;background-color:#ff7f00"></i> Other</div> -->
     
 </body>
 
@@ -93,7 +94,7 @@
     var speed = $("#zoomtooverlap").data("ts-speed");
     console.log('spe',speed);
 
-    function fetchAllData(){
+    // Display All Plantation on checkbox
     $('#firstCheckbox').on('change', function() {
         if($(this).is(':checked')){
             checked = true
@@ -124,8 +125,8 @@
     }
 
     })
-}
-    fetchAllData()
+
+    // Display 2019-20 plantations
 
     $('#secondCheckbox').on('change', function() {
         var myStyle = {
@@ -161,6 +162,8 @@
         map.removeLayer(gson2019_20)
     }
     })
+
+    //Display 2020/21 plantations
     $('#thirdCheckbox').on('change', function() {
         var myStyle = {
             "color": "#fa0707",
@@ -219,6 +222,7 @@
                     var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
                     // console.log('data 13', popuptext);
                     layer.bindPopup(popuptext).addTo(map)
+                    
                     
                     // console.log('map',map);
                 })
@@ -328,12 +332,58 @@
                 assetLayerGroup.addLayer(gsonalldata)
                 // map.fitBounds(gsonalldata.getBounds())
                 gsonalldata.eachLayer(function(layer) {
-                    var popuptext = `<b>District</b> : ${layer.feature.properties.name}<br>`
-                    layer.bindPopup(popuptext).addTo(map)
+                    var popuptext = `<b>${layer.feature.properties.name}</b> <br>`
+                    layer.bindTooltip(popuptext,{permanent: true, opacity: 1,direction: "center",
+                    className: "my-labels"}).addTo(map)
                 })
                 // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
                 
             })
+
+        // Adding Legend
+
+            function getColor(d) {
+        return d === 'District Boundary'  ? "#f2b866" :
+               d === 'All Plantations'  ? "#5095F6" :
+               d === 'Plantation 2019/20' ? "#ff7800" :
+               d === 'Plantation 2020/21' ? "#fa0707" :
+                            "#03fc62";
+    }
+
+    function style(feature) {
+        return {
+            weight: 1.5,
+            opacity: 1,
+            fillOpacity: 1,
+            radius: 6,
+            fillColor: getColor(feature.properties.TypeOfIssue),
+            color: "grey"
+
+        };
+    }
+        var legend = L.control({position: 'bottomleft'});
+        legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend');
+        labels = ['<strong>Legend</strong>'],
+        categories = ['District Boundary','All Plantations','Plantation 2019/20','Plantation 2020/21','Other'];
+        // background-color:'+ getColor(categories[i])
+        for (var i = 0; i < categories.length; i++) {
+
+                div.innerHTML += 
+                labels.push(
+                    `<span class="dot" style="margin-left:2px;border: 3px solid  ${getColor(categories[i])}"></span><i class="circle" style="margin-right:1px;background-color:  ${getColor(categories[i])}  "></i> ` +
+                (categories[i] ? categories[i] : `+`));
+
+            }
+            div.innerHTML = labels.join('<br>');
+        console.log('div',div);
+        return div;
+        };
+    legend.addTo(map);
+    
+
+    // To reset view on page reload
 
     if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
     console.info( "This page is reloaded" );

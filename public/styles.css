@@ -19,10 +19,12 @@
 }
 
 .dropdown-toggle{
-    background-color: crimson;
+    /* background-color: crimson; */
+    background-color: #197056;
+    color: white
 }
-.dropdown-toggle:hover{
-    background-color: black;
+#rcorners2 a:hover{
+    background-color: gray;
 }
 .my-nav h1{
     color: #3c6937
@@ -38,16 +40,49 @@
  #rcorners2 a {
     border-radius: 10px;
     /* border: 2px solid #73AD21; */
-    background-color: #f5b607;
+    /* background-color: #f5b607; */
+    background-color: #197056;
     padding: 9.5px;
     width: 200px;
     height: 150px;
-    /* color: white */
+    color: white
   }
   .trow tr:hover{
     background-color: rgb(229, 158, 158);
     cursor: pointer;
 }
+.leaflet-tooltip.my-labels {
+  background-color: transparent;
+  /* border: transparent; */
+  box-shadow: none;
+  /* font-weight: bold; */
+  color: white;
+  border-radius: 10px;
+  padding: 1px;
+  background-color:green;
+  border-color: transparent
+  }
+  .dot {
+    height: 15px;
+    width: 15px;
+    background: transparent;
+    border-radius: 15%;
+    display: inline-block;
+    padding: 5px;
+    /* border: 3px solid black; */
+  }
+  .legend{
+    background-color: lightgray;
+    padding: 7px;
+  }
+
+  .dot1{
+  width:15px ;
+  height:10px ;
+  border:1px solid black; 
+  background: transparent;
+  padding: 2px
+  }
 
 
  /* css for nav bar */
