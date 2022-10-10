@@ -24,7 +24,10 @@ app = express()
 
 app.use(cors({
     origin:'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css',
-    origin: 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js'
+    origin: 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js',
+    origin:'https://ec2-18-183-151-66.ap-northeast-1.compute.amazonaws.com/',
+    origin:'http://ec2-18-183-151-66.ap-northeast-1.compute.amazonaws.com:5000/'
+    
 }))
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true}))
