@@ -2,7 +2,7 @@
     height: 75px;
     background-color: darkgoldenrod;
 }
-#mapdiv{
+#map{
     height: 650px;
     background-color: salmon;
 }
@@ -194,3 +194,12 @@
    color: crimson;
  }
  
+ * {
+  box-sizing: border-box;
+}
+
+@media only screen and (max-width: 670px) {
+  /* body {
+    background-color: lightblue;
+  } */
+}
