@@ -6,6 +6,8 @@ var path = require('path');
 var {Pool} = require('pg');
 // bodyParser = require('body-parser');
 var pool = require('./connection')
+const cors = require('cors');
+
 // import sslRedirect from 'heroku-ssl-redirect';
 
 
@@ -20,6 +22,10 @@ var pool = require('./connection')
 
 app = express()
 
+app.use(cors({
+    origin:'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css',
+    origin: 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js'
+}))
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true}))
 
