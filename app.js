@@ -4,7 +4,7 @@ const { request } = require('http');
 const { loadavg } = require('os');
 var path = require('path');
 var {Pool} = require('pg');
-bodyParser = require('body-parser');
+// bodyParser = require('body-parser');
 var pool = require('./connection')
 // import sslRedirect from 'heroku-ssl-redirect';
 
@@ -20,7 +20,7 @@ var pool = require('./connection')
 
 app = express()
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true}))
 
 app.set('view engine', 'ejs')
@@ -30,14 +30,10 @@ app.use(express.static('public'))
 // Populates the front end fields like buttons and dropdown menus of main page
 var zoomtooverlap 
 app.get('/', function (req, res) {
-    pool.query('select id,name,ST_AsGeoJSON(polygon) from areas')
-    .then((results)=>{
-        console.log('results');
-    })
     var data_2020_21
     var data_2019_20
     
-    pool.query('select uid, site_name from "ajk plantation 2020_21"')
+    pool.query('select uid, site_name from "ajk_plantation_2020_21"')
     .then((results) => {
         // console.log('aa',results.rows);
         return results.rows
@@ -83,7 +79,7 @@ app.get('/summary', (req, res) => {
 app.get('/overlap',(req, res) => {
     var query = `select a.uid,a.site_name plantation_2020_21,a.f_division div_2021,(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105) overlap_area,
     b.site_name plantation_2019_20 , b.f_division div_2019
-    from "ajk plantation 2020_21" a inner join "ajk_spring_plantation_2019-20_final" b
+    from "ajk_plantation_2020_21" a inner join "ajk_spring_plantation_2019-20_final" b
     on st_overlaps(a.geom,b.geom) order by overlap_area desc`
     pool.query(query)
     .then((results) => {
@@ -114,7 +110,7 @@ app.get('/data',(req, res) => {
           'P_Year',p_year
 	  )
     ) AS feature
-    FROM "ajk plantation 2020_21"
+    FROM "ajk_plantation_2020_21"
   ) features
       `
       var select_all_data_2019_20 = `
@@ -242,7 +238,7 @@ app.get('/data/:id',(req, res, next) => {
               'M_Area',M_Area
           )
         ) AS feature
-        FROM "ajk plantation 2020_21" where uid = '${req.params.id}'
+        FROM "ajk_plantation_2020_21" where uid = '${req.params.id}'
       ) features
       `
     // console.log('resp',select_by_id);
@@ -314,8 +310,7 @@ app.post('/overlap/:id', (req, res) => {
     })
     
 })
-var http = require('http');
-const server = http.createServer(app);
+
 
 
 const port = process.env.PORT || 5000;
@@ -323,12 +318,8 @@ const port = process.env.PORT || 5000;
 //     'development',
 //     'production'
 //     ]));
-let serving = app.listen(process.env.PORT,()=>{
+app.listen(port,()=>{
     zoomtooverlap = null
-    console.log('listening on port 5000');
+    console.log('listening on port :'+port);
 });
 
-serving.on('clientError', (err, socket) => {
-    console.error('err',err);
-    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-  });
