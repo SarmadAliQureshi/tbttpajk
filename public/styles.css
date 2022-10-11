@@ -83,6 +83,20 @@
   background: transparent;
   padding: 2px
   }
+  #hformob{
+    display: none;
+  }
+
+  @media (max-width: 799px) { 
+    .my-nav h1{
+      display: none
+   }
+   #hformob{
+    display: block;
+    color: #3c6937;
+    text-align: center
+ }
+   }
 
 
  /* css for nav bar */
