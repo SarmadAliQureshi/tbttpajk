@@ -327,8 +327,8 @@ const port = process.env.PORT || 5000;
 //     'development',
 //     'production'
 //     ]));
-app.listen(port,()=>{
+app.listen(80,()=>{
     zoomtooverlap = null
-    console.log('listening on port :'+port);
+    console.log('listening on port :'+80);
 });
 
