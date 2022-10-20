@@ -41,6 +41,9 @@ var zoomtooverlap
 app.get('/', function (req, res) {
     var data_2020_21
     var data_2019_20
+    var data_2021_22
+    var data_district_boundary
+    var forestdivisions
     
     pool.query('select uid, site_name from "ajk_plantation_2020_21"')
     .then((results) => {
@@ -60,8 +63,12 @@ app.get('/', function (req, res) {
         .then((results) => {
             pool.query('select division_name,d_uid,f_circle from ajk_forest_divisions order by f_circle asc')
             .then((results) => {
+                forestdivisions = results.rows
+                pool.query('select uid, site_name from ajk_plantation_2021_22')
+                .then((results) => {
+                    res.render('plantation',{ data_2020_21: data_2020_21,data_2019_20: data_2019_20,f_division:forestdivisions,data_2021_22:results.rows,overlap:zoomtooverlap});
+                })
                 // console.log('divs',results.rows);
-                res.render('plantation',{ data_2020_21: data_2020_21,data_2019_20: data_2019_20,f_division:results.rows,overlap:zoomtooverlap});
             })
 
         })
@@ -86,10 +93,10 @@ app.get('/summary', (req, res) => {
 
 //displaing overlaping plantation areas
 app.get('/overlap',(req, res) => {
-    var query = `select a.uid,a.site_name plantation_2020_21,a.f_division div_2021,(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105) overlap_area,
+    var query = `select a.uid,a.site_name plantation_2020_21,a.f_division div_2021,round(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105) overlap_area,
     b.site_name plantation_2019_20 , b.f_division div_2019
     from "ajk_plantation_2020_21" a inner join "ajk_spring_plantation_2019-20_final" b
-    on st_overlaps(a.geom,b.geom) order by overlap_area desc`
+    on st_overlaps(a.geom,b.geom) order by overlap_area desc limit 18`
     pool.query(query)
     .then((results) => {
         // console.log('re',results.rows);
@@ -97,9 +104,44 @@ app.get('/overlap',(req, res) => {
     })
 })
 
+//displaing overlaping plantation areas 2021/22
+app.get('/overlap2022',(req, res) => {
+    var query = `select a.uid,a.site_name plantation_2021_22,a.f_division div_2021_22,round(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105) as
+    overlap_area,
+    b.site_name site_name , b.f_division f_division, b.p_year plantation_year
+    from ajk_plantation_2021_22  a  inner join ajk_all_plantations_2019_20_21 b 
+    on st_overlaps(a.geom,b.geom) order by overlap_area desc limit 8`
+    pool.query(query)
+    .then((results) => {
+        // console.log('re',results.rows);
+        res.render('overlap2022', {data: results.rows});
+    })
+})
+
 
 // Fetching all data to display polygons on map
 app.get('/data',(req, res) => {
+
+    var select_all_data_2021_22 = `
+    SELECT jsonb_build_object(
+        'type',     'FeatureCollection',
+        'features', jsonb_agg(feature)
+      )
+      FROM (
+        SELECT jsonb_build_object(
+          'type',       'Feature',
+          'geometry',   ST_AsGeoJSON(st_transform((geom),4326))::jsonb,
+          'properties', jsonb_build_object(
+              'name', site_name,
+              'id', uid,
+                'F_Division',F_Division,
+              'M_Area',M_Area,
+              'P_Year',p_year
+          )
+        ) AS feature
+        FROM ajk_plantation_2021_22
+      ) features`
+
     // Puts all data on map
     var select_all_data_2020_21 = `
     
@@ -172,6 +214,7 @@ app.get('/data',(req, res) => {
         // console.log('results 2', results);
         var data19 = results
         var data_2020_21
+        var data_2021_22
         pool.query(select_all_data_2020_21)
         .then((results)=>{
             // console.log('results 3',data19);
@@ -179,7 +222,13 @@ app.get('/data',(req, res) => {
             pool.query(select_ajk_distict_boundary)
             // res.send({data2019_20:data19,data2020_21:results.rows[0].jsonb_build_object})
             .then((results)=>{
-                res.send({data2019_20:data19,data2020_21:data_2020_21,disttricts:results.rows[0].jsonb_build_object})
+                data_district_boundary = results.rows[0].jsonb_build_object
+                pool.query(select_all_data_2021_22)
+                .then((results)=>{
+                    data_2021_22 = results.rows[0].jsonb_build_object
+                    res.send({data2019_20:data19,data2020_21:data_2020_21,disttricts:data_district_boundary,data2021_22:data_2021_22})
+                })
+                
 
             })
         })
@@ -230,36 +279,7 @@ app.get('/api',(req, res, next)=>{
 })
 app.get('/data/:id',(req, res, next) => {
     console.log(req.params.id);
-    var select_by_id = `
-    
-    SELECT jsonb_build_object(
-        'type',     'FeatureCollection',
-        'features', jsonb_agg(feature)
-      )
-      FROM (
-        SELECT jsonb_build_object(
-          'type',       'Feature',
-          'geometry',   ST_AsGeoJSON(st_transform((geom),4326))::jsonb,
-          'properties', jsonb_build_object(
-              'name', site_name,
-              'id', uid,
-              'Forest Division',F_Division,
-              'M_Area',M_Area
-          )
-        ) AS feature
-        FROM "ajk_plantation_2020_21" where uid = '${req.params.id}'
-      ) features
-      `
-    // console.log('resp',select_by_id);
-    pool.query(select_by_id)
-    .then((result) => {
-        // var result = result.rows[0].jsonb_build_object.features
-        // console.log('result by id',result.rows[0].jsonb_build_object);
-        if(result.rows[0].jsonb_build_object.features){
-        res.send(result.rows[0].jsonb_build_object)
-    }
-        else{
-            console.log('in else');
+    console.log('in else');
             var select_by_id_2019 = `
     
             SELECT jsonb_build_object(
@@ -276,7 +296,7 @@ app.get('/data/:id',(req, res, next) => {
                     'Forest Division',F_Division
                 )
                 ) AS feature
-                FROM "ajk_spring_plantation_2019-20_final" where uid = '${req.params.id}'
+                FROM ajk_plantation_all where uid = '${req.params.id}'
             ) features
             `
             pool.query(select_by_id_2019)
@@ -284,12 +304,10 @@ app.get('/data/:id',(req, res, next) => {
                 res.send(result.rows[0].jsonb_build_object)
 
             })
-        }
-        // res.render('zoomtoselectedplantation',{data:result.rows[0].jsonb_build_object,api:req.params.id})
-    })
     
 })
 
+// On clicking row in overlaps table zoom to that site on map
 app.post('/overlap/:id', (req, res) => {
     console.log('abc1',req.params.id);
     query = `
@@ -321,12 +339,7 @@ app.post('/overlap/:id', (req, res) => {
 })
 
 
-
 const port = process.env.PORT || 5000;
-// app.use(sslRedirect([
-//     'development',
-//     'production'
-//     ]));
 app.listen(80,()=>{
     zoomtooverlap = null
     console.log('listening on port :'+80);

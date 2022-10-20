@@ -20,6 +20,10 @@
               <label class="form-check-label" for="firstCheckbox">All Plantations</label>
             </li>
             <li class="list-group-item">
+                <input class="form-check-input me-1" type="checkbox" value="" id="fourthCheckbox">
+                <label class="form-check-label" for="fourthCheckbox">Plantation 2021/22</label>
+              </li>
+            <li class="list-group-item">
                 <input class="form-check-input me-1" type="checkbox" value="" id="thirdCheckbox">
                 <label class="form-check-label" for="thirdCheckbox">Plantation 2020/21</label>
               </li>
@@ -28,8 +32,19 @@
               <label class="form-check-label" for="secondCheckbox">Plantation 2019/20</label>
             </li>
             
+            
           </ul>
-          <div class="dropdown" style="margin: 5px auto;">
+          <div class="dropdown" >
+            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Plantation 2021/22
+            </a>
+            <ul class="dropdown-menu">
+                    <%data_2021_22.forEach((data)=>{%>
+                        <li><a class="dropdown-item item" id=<%= data.uid%>><%=data.site_name%></a></li>
+                    <%})%>
+            </ul>
+          </div>
+          <div class="dropdown">
             <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Plantation 2020/21
             </a>
@@ -50,7 +65,7 @@
             </ul>
           </div>
 
-          <div class="dropdown" style="margin: 5px auto;">
+          <div class="dropdown">
             <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Forest Division
             </a>
@@ -85,6 +100,27 @@
 </body>
 
 <script type="text/javascript">
+
+var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    })
+    var goggle_satellite = L.gridLayer
+	.googleMutant({
+		type: "satellite", // valid values are 'roadmap', 'satellite', 'terrain' and 'hybrid'
+	})
+    var map = L.map('map',{layers:[goggle_satellite,osm_map]})
+    // map.setView([33,77], 9)
+    map.addLayer(osm_map);
+
+    var baseMaps = {
+        "OpenStreetMap":osm_map,
+        "Google Satellite Map":goggle_satellite,
+    }
+    var layerControl = L.control.layers(baseMaps).addTo(map);
+    map.setView([33.72169354140095, 73.58130240275987],8)
+
+    
     var item_clicked 
     var checked = false
 
@@ -93,6 +129,7 @@
     var gsonalldata
     var gson2019_20
     var gson2020_21
+    var gson2021_22
 
     var speed = $("#zoomtooverlap").data("ts-speed");
     console.log('spe',speed);
@@ -110,7 +147,7 @@
             .then((data)=>{
                 
                 // console.log('data 12',data);
-                gsonalldata = L.geoJSON([data.data2020_21,data.data2019_20]).addTo(map);
+                gsonalldata = L.geoJSON([data.data2020_21,data.data2019_20,data.data2021_22]).addTo(map);
                 assetLayerGroup.addLayer(gsonalldata)
                 // map.fitBounds(gsonalldata.getBounds())
                 gsonalldata.eachLayer(function(layer) {
@@ -128,14 +165,12 @@
     }
 
     })
-
-    // Display 2019-20 plantations
-
-    $('#secondCheckbox').on('change', function() {
+    //Display 2021/22 plantations
+    $('#fourthCheckbox').on('change', function() {
         var myStyle = {
-            "color": "#ff7800",
-            "weight": 5,
-            "opacity": 0.65,
+            "color": "#fa0707",
+            "weight": 3,
+            "opacity": 1,
             "fillOpacity": 0
         };
         if($(this).is(':checked')){
@@ -149,8 +184,8 @@
             .then((data)=>{
                 
                 // console.log('data 12',data);
-                gson2019_20 = L.geoJSON([data.data2019_20],{style:myStyle}).addTo(map);
-                gson2019_20.eachLayer(function(layer) {
+                gson2021_22 = L.geoJSON([data.data2021_22],{style:myStyle}).addTo(map);
+                gson2021_22.eachLayer(function(layer) {
                     var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
                     // console.log('data 13', popuptext);
                     layer.bindPopup(popuptext).addTo(map)
@@ -161,17 +196,17 @@
         }
         
     else{
-        console.log('false',gson2019_20);
-        map.removeLayer(gson2019_20)
+        console.log('false',gson2021_22);
+        map.removeLayer(gson2021_22)
     }
     })
 
-    //Display 2020/21 plantations
+    //Display 2020/21 plantations..
     $('#thirdCheckbox').on('change', function() {
         var myStyle = {
-            "color": "#fa0707",
-            "weight": 5,
-            "opacity": 0.65,
+            "color": "#dd87f5",
+            "weight": 3,
+            "opacity": 1,
             "fillOpacity": 0
         };
         if($(this).is(':checked')){
@@ -201,6 +236,45 @@
         map.removeLayer(gson2020_21)
     }
     })
+
+    // Display 2019-20 plantations
+
+    $('#secondCheckbox').on('change', function() {
+        var myStyle = {
+            "color": "#ff7800",
+            "weight": 3,
+            "opacity": 1,
+            "fillOpacity": 0
+        };
+        if($(this).is(':checked')){
+            checked = true
+            fetch('/data')
+            // 2 methods to write this  arrow function
+            // .then(response=>response.json())
+            .then((response)=>{
+                return response.json();
+            })
+            .then((data)=>{
+                
+                // console.log('data 12',data);
+                gson2019_20 = L.geoJSON([data.data2019_20],{style:myStyle}).addTo(map);
+                gson2019_20.eachLayer(function(layer) {
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    // console.log('data 13', popuptext);
+                    layer.bindPopup(popuptext).addTo(map)
+                })
+                // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
+                // map.fitBounds(gson.getBounds())
+            })
+        }
+        
+    else{
+        console.log('false',gson2019_20);
+        map.removeLayer(gson2019_20)
+    }
+    })
+    
+
     // Display data on map based on forest divisions
     var checkedids = []
     var id_ 
@@ -259,24 +333,7 @@
     return this;
 };
 
-    var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-    })
-    var goggle_satellite = L.gridLayer
-	.googleMutant({
-		type: "satellite", // valid values are 'roadmap', 'satellite', 'terrain' and 'hybrid'
-	})
-    var map = L.map('map',{layers:[goggle_satellite,osm_map]})
-    // map.setView([33,77], 9)
-    map.addLayer(osm_map);
-
-    var baseMaps = {
-        "OpenStreetMap":osm_map,
-        "Google Satellite Map":goggle_satellite,
-    }
-    var layerControl = L.control.layers(baseMaps).addTo(map);
-    map.setView([33.72169354140095, 73.58130240275987],8)
+   
 
     var popup_marker = L.marker([0,0])
     $('.item').click(function(e) {
@@ -325,7 +382,7 @@
             .then((data)=>{
                 var myStyle = {
                 "color": "#f2b866",
-                "weight": 3.5,
+                "weight": 3,
                 "opacity": 1,
                 "fillOpacity": 0
             };  
@@ -349,8 +406,11 @@
         return d === 'District Boundary'  ? "#f2b866" :
                d === 'All Plantations'  ? "#5095F6" :
                d === 'Plantation 2019/20' ? "#ff7800" :
-               d === 'Plantation 2020/21' ? "#fa0707" :
+               d ===  'Plantation 2021/22' ? "#fa0707" :
+               d === 'Plantation 2020/21' ? "#dd87f5" :
+
                             "#03fc62";
+                            
     }
 
     function style(feature) {
@@ -369,7 +429,7 @@
 
         var div = L.DomUtil.create('div', 'info legend');
         labels = ['<strong>Legend</strong>'],
-        categories = ['District Boundary','All Plantations','Plantation 2019/20','Plantation 2020/21','Other'];
+        categories = ['District Boundary','All Plantations','Plantation 2021/22','Plantation 2020/21','Plantation 2019/20'];
         // background-color:'+ getColor(categories[i])
         for (var i = 0; i < categories.length; i++) {
 

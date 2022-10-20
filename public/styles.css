@@ -17,6 +17,9 @@
 .attraction{
     margin-bottom: 10px;
 }
+.dropdown{
+  margin: 5px auto;
+}
 
 .dropdown-toggle{
     /* background-color: crimson; */
@@ -27,11 +30,12 @@
     background-color: gray;
 }
 .my-nav h1{
-    color: #3c6937
+    color: red;
+    margin-bottom: 20px;
  }
  
 .my-nav h1:hover{
-    color: red
+    color: #197056
  }
  .my-nav a{
     font-weight:bold
@@ -42,10 +46,10 @@
     /* border: 2px solid #73AD21; */
     /* background-color: #f5b607; */
     background-color: #197056;
-    padding: 9.5px;
-    width: 200px;
-    height: 150px;
-    color: white
+    /* padding: 9.5px; */
+    /* width: 200px; */
+    color: white;
+    text-align: center;
   }
   .trow tr:hover{
     background-color: rgb(229, 158, 158);
@@ -93,7 +97,7 @@
    }
    #hformob{
     display: block;
-    color: #3c6937;
+    color:red;
     text-align: center
  }
    }

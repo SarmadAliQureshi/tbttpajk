@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/header.ejs') %> 
+<%- include('./partials/nav.ejs')  %> 
+<body>
+    <!-- <form  action="/overlap" method="POST">
+        <label for="title">Blog Title</label>
+        <input type="text" id="title" name="title" required>
+        <button id="submit">Submit</button>
+    </form> -->
+
+    <table class="table table-striped table-hover">
+        <thead>
+          <tr style="background-color: #cf6034; color: wheat;">
+            <th scope="col">#</th>
+            <th scope="col">Site Name</th>
+            <th scope="col">Forest Division</th>
+            <th scope="col">Overlap Area(Ac)</th>
+            <th scope="col">Site Name</th>
+            <th scope="col">Forest Division</th>
+            <th scope="col">Plantation Year</th>
+          </tr>
+        </thead>
+        <tbody class='trow'>
+          <% var count = 0 %>
+          <% data.forEach((data)=>{%>
+            <tr id=<%=data.uid %>>
+                <% count = count +1%>
+                <th scope="row"><%=count  %> </th>
+                <td><%=data.plantation_2021_22 %></td>
+                <td><%=data.div_2021_22 %></td>
+                <td><%=data.overlap_area %></td>
+                <td><%=data.site_name %></td>
+                <td><%=data.f_division %></td>
+                <td><%=data.plantation_year %></td>
+
+                <td id = 'sitesum'><%=data.plantation_2019_20 %></td>
+                <td><%=data.div_2019 %></td>
+            </tr>
+          <%})%> 
+
+
+        </tbody>
+      </table>
+    
+</body>
+
+<script>
+    console.log('above');
+    // fetch("/overlap/1234", {
+    //     // console.log('in fetch api');
+    //     // Adding method type
+    //     method: "POST",
+    //     mode:"cors",
+        
+    //     // Adding body or contents to send
+    //     body: JSON.stringify({
+    //         title: "foo",
+    //         body: "bar",
+    //         userId: 1
+    //     }),
+        
+    //     // Adding headers to the request
+    //     headers: {
+    //         "Content-type": "application/json"
+    //     }
+    // }).then(function(response) {
+    //     // console.log('response');
+    //     return response.json();
+    // })
+    // .then((response) => {  
+    //     console.log('response',response);
+    // })
+
+//     async function checkIfCheater(nameToCheck) {
+//         console.log('async fun', nameToCheck);
+//     let testJson = {
+//         "GameName": nameToCheck
+//     };
+
+//     const res = await fetch('/overlap', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(testJson)
+//     });
+//     console.log('res', res);
+//     const data = await res.json();
+//     console.log('data', data);
+//     return data;
+// }
+
+// checkIfCheater('name').then(data => console.log(data));
+    
+    $('tr').on('click',(e)=>{
+        var endpoint = '/overlap/'+e.currentTarget.id
+        console.log(endpoint);
+              
+        fetch(endpoint,{
+            method: 'POST',
+        })
+        .then((response) =>{
+            console.log('aaa',response.json());
+            return response.json()
+        })
+        .then((data) => {
+            console.log('data',data)
+            window.location.href = '/'
+        })
+        .catch((e) => {console.log('err');
+        window.location.href = '/'
+        })
+
+        console.log('axxx');
+
+    })
+
+</script>
+
+</html>
