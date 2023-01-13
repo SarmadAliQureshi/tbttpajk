@@ -5,7 +5,6 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    // "start": "nodemon app.js -e ejs,js,css,html,jpg,png,scss",
     "dev":"nodemon -L app.js.js "
   },
   "author": "",
