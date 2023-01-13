@@ -8,6 +8,16 @@ var {Pool} = require('pg');
 var pool = require('./connection')
 const cors = require('cors');
 
+// To refresh browser automatically on ejs changes
+var livereload = require("livereload");
+var connectLiveReload = require("connect-livereload");
+const liveReloadServer = livereload.createServer();
+liveReloadServer.server.once("connection", () => {
+  setTimeout(() => {
+    liveReloadServer.refresh("/");
+  }, 100);
+});
+
 // import sslRedirect from 'heroku-ssl-redirect';
 
 
@@ -21,6 +31,7 @@ const cors = require('cors');
 //   })
 
 app = express()
+app.use(connectLiveReload());
 
 app.use(cors({
     origin:'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css',
@@ -54,7 +65,7 @@ app.get('/', function (req, res) {
     
     .then((results)=>{
         data_2020_21 = results
-        pool.query('select uid, site_name from "ajk_spring_plantation_2019-20_final"')
+        pool.query('select uid, site_name from ajk_plantation_2019_20')
         .then((results) => {
             // console.log('res 1 ',results.rows);
             data_2019_20 = results.rows
@@ -95,7 +106,7 @@ app.get('/summary', (req, res) => {
 app.get('/overlap',(req, res) => {
     var query = `select a.uid,a.site_name plantation_2020_21,a.f_division div_2021,round(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105) overlap_area,
     b.site_name plantation_2019_20 , b.f_division div_2019
-    from "ajk_plantation_2020_21" a inner join "ajk_spring_plantation_2019-20_final" b
+    from "ajk_plantation_2020_21" a inner join ajk_plantation_2019_20 b
     on st_overlaps(a.geom,b.geom) order by overlap_area desc limit 18`
     pool.query(query)
     .then((results) => {
@@ -117,6 +128,21 @@ app.get('/overlap2022',(req, res) => {
         res.render('overlap2022', {data: results.rows});
     })
 })
+//displaing overlaping all plantations with anr_2019_20
+app.get('/allplantation_anr1920_overlaps',(req, res) => {
+    var query = `select a.uid,a.site_name plantation_name,a.f_division plantation_div,a.p_year as p_year,
+	(round(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105)) as overlap_area,
+    b.site_name anr_2019_20 , b.f_division anr_div
+    from ajk_plantation_all a inner join ajk_anr_2019_2020_polygons b
+    on st_overlaps(a.geom,b.geom)
+	where (round(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105))>5
+	order by p_year desc  `
+    pool.query(query)
+    .then((results) => {
+        // console.log('re',results.rows);
+        res.render('allplantation_anr1920_overlaps', {data: results.rows});
+    })
+})
 
 
 // Fetching all data to display polygons on map
@@ -136,7 +162,8 @@ app.get('/data',(req, res) => {
               'id', uid,
                 'F_Division',F_Division,
               'M_Area',M_Area,
-              'P_Year',p_year
+              'P_Year',p_year,
+              'C_Area',C_Area
           )
         ) AS feature
         FROM ajk_plantation_2021_22
@@ -158,7 +185,8 @@ app.get('/data',(req, res) => {
           'id', uid,
 	  	  'F_Division',F_Division,
           'M_Area',M_Area,
-          'P_Year',p_year
+          'P_Year',p_year,
+          'C_Area',C_Area
 	  )
     ) AS feature
     FROM "ajk_plantation_2020_21"
@@ -179,10 +207,11 @@ app.get('/data',(req, res) => {
           'id', uid,
 	  	'F_Division',F_Division,
         'M_Area',M_Area,
-        'P_Year',p_year
+        'P_Year',p_year,
+        'C_Area',C_Area
 	  )
     ) AS feature
-    FROM "ajk_spring_plantation_2019-20_final"
+    FROM ajk_plantation_2019_20
   ) features
       `
 
@@ -202,6 +231,7 @@ app.get('/data',(req, res) => {
         FROM ajk_district_boundaries
       ) features
     `
+    
     // pool.query('select id,name,ST_AsGeoJSON(polygon) as geometry from areas limit 1 ')
     pool.query(select_all_data_2019_20) 
     .then((results)=>{
@@ -238,6 +268,36 @@ app.get('/data',(req, res) => {
     // res.send(test_data)
 })
 
+// Fetching ANR 2019_20 data 
+app.get('/anr2019_20',(req,res)=>{
+    var select_2019_20_anr =   `
+    SELECT jsonb_build_object(
+        'type',     'FeatureCollection',
+        'features', jsonb_agg(feature)
+      )
+      FROM (
+        SELECT jsonb_build_object(
+          'type',       'Feature',
+          'geometry',   ST_AsGeoJSON(st_transform((geom),4326))::jsonb,
+          'properties', jsonb_build_object(
+              'name', site_name,
+              'id', uid,
+              'F_Division',F_Division,
+            'M_Area',M_Area,
+            'P_Year',p_year
+          )
+        ) AS feature
+        FROM ajk_anr_2019_2020_polygons
+      ) features
+    
+    `
+    pool.query(select_2019_20_anr)
+    .then((result)=>{
+        // console.log('ANR :', result.rows[0].jsonb_build_object);
+        res.send(result.rows[0].jsonb_build_object)
+    })
+})
+
 //Fetching data based on divisions
 app.get('/division/:id',(req,res)=>{
     console.log('res',req.params.text);
@@ -256,7 +316,8 @@ app.get('/division/:id',(req,res)=>{
                 'id', uid,
                 'F_Division',F_Division,
                 'M_Area',M_Area,
-                'P_Year',p_year
+                'P_Year',p_year,
+                'C_Area',c_area
             )
             ) AS feature
             FROM ajk_plantation_all where d_uid = '${req.params.id}'

@@ -31,6 +31,10 @@
               <input class="form-check-input me-1" type="checkbox" value="" id="secondCheckbox">
               <label class="form-check-label" for="secondCheckbox">Plantation 2019/20</label>
             </li>
+            <li class="list-group-item">
+                <input class="form-check-input me-1" type="checkbox" value="" id="anrCheckbox">
+                <label class="form-check-label" for="anrCheckbox">ANR 2019-20</label>
+            </li>
             
             
           </ul>
@@ -78,7 +82,7 @@
                         </li>
                             <%})%>     
                     </ul>
-          </div>
+            </div>
           
           
 
@@ -151,7 +155,7 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 assetLayerGroup.addLayer(gsonalldata)
                 // map.fitBounds(gsonalldata.getBounds())
                 gsonalldata.eachLayer(function(layer) {
-                    var popuptext = `<div class="modal-dialog modal-sm" ><b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}</div>`
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Claimed Area(ac) : </b>${layer.feature.properties.C_Area}<br><b>Monitored Area(ac) : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
                     layer.bindPopup(popuptext).addTo(map)
                 })
                 // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
@@ -186,7 +190,7 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 // console.log('data 12',data);
                 gson2021_22 = L.geoJSON([data.data2021_22],{style:myStyle}).addTo(map);
                 gson2021_22.eachLayer(function(layer) {
-                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Claimed Area(ac) : </b>${layer.feature.properties.C_Area}<br><b>Monitored Area(ac) : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
                     // console.log('data 13', popuptext);
                     layer.bindPopup(popuptext).addTo(map)
                 })
@@ -222,7 +226,7 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 // console.log('data 12',data);
                 gson2020_21 = L.geoJSON([data.data2020_21],{style:myStyle}).addTo(map);
                 gson2020_21.eachLayer(function(layer) {
-                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Claimed Area(ac) : </b>${layer.feature.properties.C_Area}<br><b>Monitored Area(ac) : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
                     // console.log('data 13', popuptext);
                     layer.bindPopup(popuptext).addTo(map)
                 })
@@ -259,7 +263,45 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 // console.log('data 12',data);
                 gson2019_20 = L.geoJSON([data.data2019_20],{style:myStyle}).addTo(map);
                 gson2019_20.eachLayer(function(layer) {
-                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Claimed Area(ac) : </b>${layer.feature.properties.C_Area}<br><b>Monitored Area(ac) : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    // console.log('data 13', popuptext);
+                    layer.bindPopup(popuptext).addTo(map)
+                })
+                // var gson1 = L.geoJSON(data.data2020_21).addTo(map);
+                // map.fitBounds(gson.getBounds())
+            })
+        }
+        
+    else{
+        console.log('false',gson2019_20);
+        map.removeLayer(gson2019_20)
+    }
+    })
+
+    // Display 2019-20 ANR data
+
+    $('#anrCheckbox').on('change', function() {
+        var myStyle = {
+            "color": "#ff7800",
+            "weight": 3,
+            "opacity": 1,
+            "fillOpacity": 0
+        };
+        if($(this).is(':checked')){
+            console.log('checked anr');
+            checked = true
+            fetch('/anr2019_20')
+            // 2 methods to write this  arrow function
+            // .then(response=>response.json())
+            .then((response)=>{
+                return response.json();
+            })
+            .then((data)=>{
+                
+                console.log('data 12',data);
+                gson2019_20 = L.geoJSON([data],{style:myStyle}).addTo(map);
+                gson2019_20.eachLayer(function(layer) {
+                    var popuptext = `<b>ANR Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area(ac) : </b>${layer.feature.properties.M_Area}<br><b>ANR Year: </b>${layer.feature.properties.P_Year}`
                     // console.log('data 13', popuptext);
                     layer.bindPopup(popuptext).addTo(map)
                 })
@@ -296,7 +338,7 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 console.log('id,',x);
                 map.fitBounds(gson.getBounds())
                 gson.eachLayer(function(layer) {
-                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Area in Acres : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
+                    var popuptext = `<b>Name</b> : ${layer.feature.properties.name}<br> <b>Forest Division : </b> ${layer.feature.properties.F_Division}<br><b>Claimed Area(ac) : </b>${layer.feature.properties.C_Area}<br><b>Monitored Area(ac) : </b>${layer.feature.properties.M_Area}<br><b>Plantation Year: </b>${layer.feature.properties.P_Year}`
                     // console.log('data 13', popuptext);
                     layer.bindPopup(popuptext).addTo(map)
                     

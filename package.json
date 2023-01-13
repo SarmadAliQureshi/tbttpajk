@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "nodemon app.js -e ejs,js,css,html,jpg,png,scss",
+    "dev":"nodemon -L app.js.js "
   },
   "author": "",
   "license": "ISC",
@@ -19,5 +20,10 @@
     "leaflet": "^1.8.0",
     "pg": "^8.8.0",
     "serve": "^14.0.1"
+  },
+  "devDependencies": {
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.9.3",
+    "nodemon": "^2.0.20"
   }
 }
