@@ -56,6 +56,7 @@ app.get('/', function (req, res) {
     var data_district_boundary
     var forestdivisions
     
+    // Populating front end fields of plantations and divisions list
     pool.query('select uid, site_name from "ajk_plantation_2020_21"')
     .then((results) => {
         // console.log('aa',results.rows);
@@ -133,7 +134,7 @@ app.get('/allplantation_anr1920_overlaps',(req, res) => {
     var query = `select a.uid,a.site_name plantation_name,a.f_division plantation_div,a.p_year as p_year,
 	(round(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105)) as overlap_area,
     b.site_name anr_2019_20 , b.f_division anr_div
-    from ajk_plantation_all a inner join ajk_anr_2019_2020_polygons b
+    from ajk_plantation_all a inner join ajk_anr_all b
     on st_overlaps(a.geom,b.geom)
 	where (round(st_area(st_intersection(ST_MakeValid(a.geom),ST_MakeValid(b.geom)))*0.000247105))>5
 	order by p_year desc  `
@@ -262,14 +263,12 @@ app.get('/data',(req, res) => {
 
             })
         })
-        // res.send(results.rows[0].jsonb_build_object)
     })
     
-    // res.send(test_data)
 })
 
 // Fetching ANR 2019_20 data 
-app.get('/anr2019_20',(req,res)=>{
+app.get('/anr_all',(req,res)=>{
     var select_2019_20_anr =   `
     SELECT jsonb_build_object(
         'type',     'FeatureCollection',
@@ -287,7 +286,7 @@ app.get('/anr2019_20',(req,res)=>{
             'P_Year',p_year
           )
         ) AS feature
-        FROM ajk_anr_2019_2020_polygons
+        FROM ajk_anr_all
       ) features
     
     `
@@ -334,13 +333,37 @@ app.get('/division/:id',(req,res)=>{
 
 // Showing the list of forest divisions home page
 
+app.get('/home', (req, res) => {
+    var select_ajk_distict_boundary = `
+      SELECT jsonb_build_object(
+        'type',     'FeatureCollection',
+        'features', jsonb_agg(feature)
+      )
+      FROM (
+        SELECT jsonb_build_object(
+          'type',       'Feature',
+          'geometry',   ST_AsGeoJSON(st_transform((geom),4326))::jsonb,
+          'properties', jsonb_build_object(
+              'name', name
+          )
+        ) AS feature
+        FROM ajk_district_boundaries
+      ) features
+    `
+    pool.query(select_ajk_distict_boundary)
+    .then((results)=>{
+        // console.log('home',results.rows[0].jsonb_build_object);
+        res.send(results.rows[0].jsonb_build_object)
+    })
+
+})
 
 app.get('/api',(req, res, next)=>{
     res.send({a:'sar',b:'postgres'})
 })
 app.get('/data/:id',(req, res, next) => {
     console.log(req.params.id);
-    console.log('in else');
+    console.log('in else home');
             var select_by_id_2019 = `
     
             SELECT jsonb_build_object(

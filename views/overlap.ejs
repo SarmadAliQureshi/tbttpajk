@@ -35,7 +35,7 @@
 </body>
 
 <script>
-    console.log('above');
+    console.log('2020_21 Overlaps page');
     $('tr').on('click',(e)=>{
         var endpoint = '/overlap/'+e.currentTarget.id
         console.log(endpoint);
@@ -44,15 +44,17 @@
             method: 'POST',
         })
         .then((response) =>{
-            console.log('aaa',response.json());
+            // console.log('aaa',response.json());
             return response.json()
         })
         .then((data) => {
             console.log('data',data)
             window.location.href = '/'
+            e.preventDefault()
         })
         .catch((e) => {console.log('err');
-        window.location.href = '/'
+        // window.location.href = '/'
+        
         })
 
         console.log('axxx');

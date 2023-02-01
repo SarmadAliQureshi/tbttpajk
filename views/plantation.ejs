@@ -12,7 +12,7 @@
     <div id="side-panel" class="col-md-3 overflow-auto dropdown">
         <h1 class="text-center" >Plantation List</h1>
         <hr>
-        <p id="zoomtooverlap" data-ts-speed="500" value = "<%= overlap%>"  ></p>
+        <p id="zoomtooverlap" data-ts-speed="500" value = "<%= overlap%>"></p>
         
           <ul class="list-group">
             <li class="list-group-item">
@@ -290,7 +290,7 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         if($(this).is(':checked')){
             console.log('checked anr');
             checked = true
-            fetch('/anr2019_20')
+            fetch('/anr_all')
             // 2 methods to write this  arrow function
             // .then(response=>response.json())
             .then((response)=>{
@@ -316,6 +316,21 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     }
     })
     
+    // When user clicks on home button map will zoom out the the extent of AJK
+    $('#home').on('click',function(event){
+        event.preventDefault()
+        console.log('clicked on home button');
+        endpoint = '/home'
+        fetch(endpoint)
+        .then((response)=>{
+            return response.json();
+        })
+        .then((result)=>{
+            var gson = L.geoJSON(result)
+            map.fitBounds(gson.getBounds())
+        })
+        console.log('end of then home');
+    })
 
     // Display data on map based on forest divisions
     var checkedids = []
@@ -397,6 +412,7 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     console.log('zoomes',$('#zoomtooverlap')[0].attributes.value.value);
     if ($('#zoomtooverlap')[0].attributes.value.value){
         var id = $('#zoomtooverlap')[0].attributes.value.value
+        console.log('zoom id',id);
         api = '/data/'+id
         fetch(api)
         .then((response)=>{
@@ -482,7 +498,7 @@ var osm_map = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
             }
             div.innerHTML = labels.join('<br>');
-        console.log('div',div);
+        // console.log('div',div);
         return div;
         };
     legend.addTo(map);
